@@ -1,0 +1,134 @@
+.*.aux
+.*.d
+*.a
+*.cma
+*.cmi
+*.cmo
+*.cmx
+*.cmxa
+*.cmxs
+*.glob
+*.ml.d
+*.ml4.d
+*.mli.d
+*.mllib.d
+*.mlpack.d
+*.native
+*.o
+*.v.d
+*.vio
+*.vo
+*.vok
+*.vos
+.coq-native/
+.csdp.cache
+.lia.cache
+.nia.cache
+.nlia.cache
+.nra.cache
+csdp.cache
+lia.cache
+nia.cache
+nlia.cache
+nra.cache
+
+# generated timing files
+*.timing.diff
+*.v.after-timing
+*.v.before-timing
+*.v.timing
+time-of-build-after.log
+time-of-build-before.log
+time-of-build-both.log
+time-of-build-pretty.log
+
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+# Added by Snow
+
+## generated files in paper folder
+ecoop2021/main.pdf
+ecoop2021/mngs/*.mng
+ecoop2021/rules/ott-rules.tex
+
+## Coq-related files:
+CoqSrc.mk
+CoqSrc.mk.conf
+
+## Originally written by Jimmy:
+## ignore all LaTeX/editor-related files
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+
+# LIPIcs / OASIcs
+*.vtc
+
+# bibTex
+*.blg
+*.bbl
+JFP2021/main.pdf
+*.fdb_latexmk
+*.fdb_latexmk
+*.synctex
+*.gz
+*.fdb_latexmk
+JFP2021/main.synctex
+JFP2021/main.synctex
+*.fdb_latexmk
+*.pdf
+*.tex_gen
+JFP2021/ott-rules.tex
+.DS_Store
+merge-reference-lambdab-project/.DS_Store
+*.cache
+.DS_Store
+merge-reference-lambdab-project/.DS_Store
+merge-reference-lambdab-project/coq/.DS_Store
+*.mng
+*.DS_Store
+merge-reference-lambdab-project/coq/.DS_Store
+.DS_Store
+merge-reference-lambdab-project/.DS_Store
+merge-reference-lambdab-project/pdf/.DS_Store
+merge-reference-lambdab-project/.DS_Store
+.DS_Store
+*.synctex(busy)
+Fsub-pj/implementation/fsub
+Fsub-pj/implementation/fsub.hi
