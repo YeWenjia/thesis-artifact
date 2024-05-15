@@ -1,3 +1,3 @@
 # thesis-artifact
 
-This includes coq or paper proofs of my thesis.
+This includes coq and paper proofs of my thesis.
