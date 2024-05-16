@@ -112,7 +112,6 @@ JFP2021/main.pdf
 JFP2021/main.synctex
 JFP2021/main.synctex
 *.fdb_latexmk
-*.pdf
 *.tex_gen
 JFP2021/ott-rules.tex
 .DS_Store
