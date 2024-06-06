@@ -1,4 +1,4 @@
-# Merging Gradual Typing (artifact)
+<!-- # Merging Gradual Typing (artifact) -->
 
 ## Abstract
 
@@ -91,7 +91,7 @@ execution time : 2m58.395s
 - `Key_properties.v` constains some necessary lemmas about casting.
 - `Subtyping_inversion.v` contains some properties of the subtyping relation and consistent subtyping.
   
-## Correspondence
+<!-- ## Correspondence
 
 
 We show some important figures, Lemmas and theorems correspondence with the coq formalization. The following table shows the correspondence between lemmas discussed in paper and their source coq codes. For example, one can find the `Definition 3.1` in file `M/coq/syntax\_ott.v` and the definition name in file is `disjointSpec`.
@@ -140,5 +140,5 @@ We show some important figures, Lemmas and theorems correspondence with the coq 
 | Fig. 13         | Wellformed             | MD/coq/syntax\_ott.v          | well                         |
 | Fig. 13         | Projection             | MD/coq/syntax\_ott.v          | get\_ty                      |
 | Fig. 13               | Label presence        | M/coq/syntax\_ott.v           | ityp                        |
-| Fig. 14               | CBN             | MD/coq/syntax\_ott.v                | cbn                         |
+| Fig. 14               | CBN             | MD/coq/syntax\_ott.v                | cbn                         | -->
 

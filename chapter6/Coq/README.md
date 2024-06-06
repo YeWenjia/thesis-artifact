@@ -1,5 +1,3 @@
-# Imperative Compositional Programming (artifact)
-
 ## Abstract
 
 This artifact contains the Coq formulation of IM and FIM calculi. This document 
@@ -89,7 +87,7 @@ execution time: 9m23.006s
 - `Type_Safety.v` contains the proofs of the type preservation and progress properties.
 - `Subtyping_inversion.v` contains some properties of the subtyping relation and consistent subtyping.
   
-## Correspondence
+<!-- ## Correspondence
 
 
 We show some important figures, Lemmas and theorems correspondence with the coq formalization. The following table shows the correspondence between lemmas discussed in paper and their source coq codes. For example, one can find the `Theorem 3.1` in file `IM/coq/Type\_Safety.v` and the definition name in file is `progress`.
@@ -120,4 +118,4 @@ We show some important figures, Lemmas and theorems correspondence with the coq 
 | Theorem 4.8      | determinism      | FIM/coq/Deterministic.v |  step\_unique  |
 | Theorem 4.9      | Progress         | FIM/coq/Type\_Safety.v  | progress  |
 | Theorem 4.10     | Preservation     | FIM/coq/Type\_Safety.v  | Preservation\_subsub  |
-| Corollary 4.11   |Preservation      | FIM/coq/Type\_Safety.v  |  Preservation\_subsub |
+| Corollary 4.11   |Preservation      | FIM/coq/Type\_Safety.v  |  Preservation\_subsub | -->

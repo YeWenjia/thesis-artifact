@@ -1,10 +1,9 @@
-#  [Artifact] Pragmatic Gradual Polymorphism with References
-
 ## Abstract
 
-This artifact contains the Coq formulation of static and gradual calculus associated with the paper "Pragmatic Gradual Polymorphism with References". 
+This artifact contains the Coq formulation of static and gradual calculus. 
 If you want to learn more about Coq, please refer to [here](https://coq.inria.fr/documentation).
-This document explains how to run the Coq formulations and Coq files briefly. Artifact can either be compiled in the pre-built docker image with all the dependencies installed or it could be built from the scratch.
+This document explains how to run the Coq formulations and Coq files briefly. 
+<!-- Artifact can either be compiled in the pre-built docker image with all the dependencies installed or it could be built from the scratch. -->
 
 ## 1) Tested platforms #
 
@@ -20,7 +19,7 @@ MacBook Pro2019: 1.4 GHz quad-core Intel Core i5
 3-6 GB
 
 
-# 4) Docker Image #
+<!-- # 4) Docker Image #
 
 This section explains how to pull the docker image of artifact from docker repo and use it. Run the following commands one by one in the terminal:
 
@@ -84,11 +83,11 @@ COQC Static.v
 COQC Criteria.v
 make[1]: Leaving directory '/home/coq/artifact15/Gradual/coq'
 ```
-4. Execution time: 2m53.827s
+4. Execution time: 2m53.827s -->
 
 
 
-# 5) Build from Scratch #
+## 4) Build from Scratch #
 
 This section explains how to build the artifact from scratch. 
 Note that we also provide a dockerfile (refer to [here](https://github.com/YeWenjia/Pragmatic-Gradual-Polymorphism-with-References/tree/main/docker)). 
@@ -113,14 +112,14 @@ Note that we also provide a dockerfile (refer to [here](https://github.com/YeWen
 
 #### Build and Compile the Proofs
 
-1. Enter  `Static/coq` or `Gradual/coq`  directory.
+1. Enter  `spr/coq` or `gpr/coq`  directory.
 
 2. Please make sure to run the command `eval $(opam env)` before running make if 
    you installed the Coq via opam. 
 
 3. Type `make` in the terminal to build and compile the proofs.
 
-4. For `Static/coq`, you should see something like the following:
+<!-- 4. For `spr/coq`, you should see something like the following:
 ```
 coq_makefile -arg '-w -variable-collision,-meta-collision,-require-in-module' -f _CoqProject -o CoqSrc.mk
 COQC LibTactics.v
@@ -132,7 +131,7 @@ COQC Determinism.v
 ```
 execution time : 33.101s
 
-For `Gradual/coq`, you should see something like the following:
+For `gpr/coq`, you should see something like the following:
 ```
 coq_makefile -arg '-w -variable-collision,-meta-collision,-require-in-module' -f _CoqProject -o CoqSrc.mk
 COQDEP VFILES
@@ -145,20 +144,20 @@ COQC Determinism.v
 COQC Static.v
 COQC Criteria.v
 ```
-execution time : 2m20.870s
-
+execution time : 2m20.870s -->
+<!-- 
 
 ## 6) Dockerfile #
 
 We also provide a dockerfile (refer to [here](https://github.com/YeWenjia/Pragmatic-Gradual-Polymorphism-with-References/tree/main/docker)) and can be built by the following command:
 
-`docker build -t esop23:v1 . `
+`docker build -t esop23:v1 . ` -->
 
 
 ## Proof Structure
 
-- `Static` directory contains the definition and proofs of static system
-- `Gradual` directory contains the definition and proofs of gradual system
+- `spr` directory contains the definition and proofs of static system
+- `gpr` directory contains the definition and proofs of gradual system
 - `Definitions` contains the locally nameless definitions of calculus.
 - `Infrastructure.v` contains the type systems of the calculi and some lemmas.
 - `Determinism.v` contains the proofs of the determinism property.
@@ -168,7 +167,7 @@ We also provide a dockerfile (refer to [here](https://github.com/YeWenjia/Pragma
 - `Soundness.v` contains the proof of type safety.
 - `Criteria.v` contains the proofs of gradual guarantee theorem.
 
-## Correspondence
+<!-- ## Correspondence
 
 
 We show some important Lemmas and theorems correspondence with the coq formalization. The following table shows the correspondence between lemmas discussed in paper and their source coq codes. For example, one can find the `Theorem 1 Determinism` in file `Static/coq/Deterministic.v` and the lemma name in file is `step_unique `.
@@ -192,4 +191,4 @@ We show some important Lemmas and theorems correspondence with the coq formaliza
 | Theorem 9  | Equivalence(dynamic) | Gradual/coq/Soundness.v     | static\_stepd\_dyn\_chk |
 | Theorem 9  | Equivalence(dynamic) | Gradual/coq/Soundness.v     | static\_stepd\_dyn\_chk |
 | Theorem 10 | DGG                  | Gradual/coq/Criteria.v      | dynamic\_guarantee\_dir |
-
+ -->
