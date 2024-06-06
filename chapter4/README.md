@@ -1,9 +1,6 @@
-# Type-Directed Operational Semantics for Gradual Typing (artifact)
-
 ## Abstract
 
-This artifact contains the Coq formulation of \B, \Bg, \Bgl and \E calculus associated with 
-the paper "Type-Directed Operational Semantics for Gradual Typing". This document 
+This artifact contains the Coq formulation of \E calculus. This document 
 explains how to run the Coq formulations and Coq files briefly. 
 
 
@@ -31,7 +28,7 @@ This section explains how to build the artifact from scratch
 
 ### Build and Compile the Proofs
 
-1. Enter  `Bg/coq`, `Bgl/coq` or ``E/coq``  directory.
+1. Enter `E/coq`  directory.
 
 2. Please make sure to run the command `eval \$(opam env)` before running make if 
    you installed the Coq via opam. 
@@ -40,7 +37,9 @@ This section explains how to build the artifact from scratch
 
 
 
-## Correspondence
+
+
+<!-- ## Correspondence
 
 There are three folders and we show some important definitions and theorems correspondence with the coq formalization. The following three tables show the correspondence between lemmas discussed in paper and their source coq code. For example, one can find the `Lemma 3.5 (Preservation)` in file `Bg/coq/Type_Safety.v` and the lemma name in file is `Cast_preservation`.
 
@@ -135,28 +134,28 @@ There are three folders and we show some important definitions and theorems corr
 | Theorem 5.6          | DGG                   | E/coq/criteria.v                  | dynamic\_guaranteel\_dir   |
 | Theorem 5.7          | DGG                   | E/coq/criteria.v                  | DGGL                       |
 | Theorem 5.7          | DGG                   | E/coq/criteria.v                  | DGGR                       |
-| Theorem 5.7          | DGG                   | E/coq/criteria.v                  | Diverge                    |
+| Theorem 5.7          | DGG                   | E/coq/criteria.v                  | Diverge                    | -->
 
 
 ## Proof Structure
 
-- `Bg/coq` directory contains the definition and proofs of \B and \Bg
-- `Bgl/coq` directory contains the definition and proofs of \B with blame labels and \Bg with blame labels  
+<!-- - `Bg/coq` directory contains the definition and proofs of \B and \Bg
+- `Bgl/coq` directory contains the definition and proofs of \B with blame labels and \Bg with blame labels   -->
 - `E/coq` directory contains the definition and proofs of \e
-- `Bg/coq/syntax_ott.v` contains the locally nameless definitions of \Bg.
+<!-- - `Bg/coq/syntax_ott.v` contains the locally nameless definitions of \Bg.
 - `Bg/coq/syntaxb_ott.v` contains the locally nameless definitions of \B.
 - `Bgl/coq/syntax_ott.v` contains the locally nameless definitions of \Bg with blame labels.
-- `Bgl/coq/syntaxb_ott.v` contains the locally nameless definitions of \B with blame labels.
+- `Bgl/coq/syntaxb_ott.v` contains the locally nameless definitions of \B with blame labels. -->
 - `E/coq/syntax_ott.v` contains the locally nameless definitions of \Bg.
-- `rules_inf.v` and `rulesb_inf.v` contains the `lngen` generated code.
+- `rules_inf.v` contains the `lngen` generated code.
 - `Infrastructure.v` contains the type systems of the calculi and some lemmas.
-- `Infrastructure_b.v` contains the type systems of the blame calculi and some lemmas.
+<!-- - `Infrastructure_b.v` contains the type systems of the blame calculi and some lemmas. -->
 - `Deterministic.v` contains the proofs of the determinism property.
-- `Typing.v` contains the proofs of some typing lemmas.
+<!-- - `Typing.v` contains the proofs of some typing lemmas.
 - `Typing_b.v` contains the proofs of some blame calculus typing lemmas.
-- `ttyping.v` contains the proofs of some elaboration typing lemmas.
+- `ttyping.v` contains the proofs of some elaboration typing lemmas. -->
 - `criteria.v` contains the proofs of gradual guarantee theorem.
 - `Type_Safety.v` contains the proofs of the type preservation and progress properties.
-- `Bgl/coq/soundness_completeness.v` contains the proofs of the soundness and completeness theorems with respect to blame calculus with  blame   label.
+<!-- - `Bgl/coq/soundness_completeness.v` contains the proofs of the soundness and completeness theorems with respect to blame calculus with  blame   label.
 - `Bgl/coq/sound_complete_blame.v` contains the proofs of the soundness and completeness theorems with respect to blame calculus with blame label.
-- `Bgl/coq/safe_theorem.v` contains the proofs of blame theorems.
+- `Bgl/coq/safe_theorem.v` contains the proofs of blame theorems. -->
