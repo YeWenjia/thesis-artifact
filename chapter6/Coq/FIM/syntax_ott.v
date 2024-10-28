@@ -18,7 +18,7 @@ Inductive typ : Set :=  (*r types *)
  | t_rcd (l: nat) (A:typ)
  | t_unit.
 
-
+(** This uses the locally nameless representation for terms and cofinite quantification in typing judgements. *)
 Inductive exp : Set :=  (*r expressions *)
  | e_var_b (_:nat) (*r variables *)
  | e_var_f (x:var) (*r variables *)
@@ -37,6 +37,7 @@ Inductive exp : Set :=  (*r expressions *)
  | e_rcd (l:nat) (e:exp)
  | e_proj (e:exp) (i:nat)
  | e_unit
+ (* Please note that e_loct is a placeholder in function TLVal for uniform top-like reference values. *)
  | e_loct.
 
 
@@ -55,6 +56,8 @@ Inductive dirflag : Set :=  (*r checking direction *)
 Definition sto : Set := list exp.
 Definition phi : Set := list typ.
 
+(* note that if location must exist, we restrict in typing rule that any location should be 
+within the store *)
 Definition store_Tlookup (n:nat) (ST: phi) :=
   nth n ST t_top.
 

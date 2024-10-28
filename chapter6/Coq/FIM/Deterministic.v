@@ -857,6 +857,18 @@ Qed.
 
 
 
+Theorem step_unique_both: forall P mu A e r1 r2 dir,
+   P |== mu -> Typing P nil e dir A -> step (e, mu) r1 -> step (e, mu) r2 -> r1 = r2.
+Proof.
+ introv ok Typ Red1 Red2.
+ destruct dir.
+ -
+   forwards*: step_unique ok Typ Red1 Red2.
+ - 
+   inverts Typ as typ sub.
+   forwards*: step_unique ok typ Red1 Red2.
+Qed.
+
 
 
 

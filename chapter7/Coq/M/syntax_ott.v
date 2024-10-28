@@ -13,7 +13,7 @@ Inductive dtyp : Set :=  (*r dtypes *)
  | dt_and (A:dtyp) (B:dtyp) (*r intersection *)
  | dt_rcd (l:var) (A:dtyp) (*r record *).
 
-
+(** This uses the locally nameless representation for terms and cofinite quantification in typing judgements. *)
 Inductive dexp : Set :=  (*r dexpdexpsions *)
  | de_var_b (_:nat) (*r variables *)
  | de_var_f (x:var) (*r variables *)
@@ -592,6 +592,9 @@ Inductive WF: dctx -> Prop :=    (* defn *)
      WF (cons ( x , A )  G ).
 
 
+(* uniq G is to make sure we dont have repeat variables. *)
+(* we use disjoint for disjointness because we have proved that it is equivalent 
+to the relation using COST. *)
 Inductive Typing : dctx -> dexp -> dirflag -> dtyp -> Prop :=    (* defn Typing *)
  | Typ_top : forall (G:dctx),
       uniq  G  ->

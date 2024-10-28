@@ -286,6 +286,7 @@ Proof.
 Qed.
 
 
+
 Lemma dsfill_eq: forall E0 e0 E e1 r1 r2,
   fill E0 e0 = fill E e1 ->
   step e0 r1 ->
@@ -405,7 +406,8 @@ Proof.
 Qed.
 
 
-Theorem step_unique: forall A e r1 r2,
+
+Theorem step_unique_chk: forall A e r1 r2,
    Typing nil e Chk A -> step e r1 -> step e r2 -> r1 = r2.
 Proof.
   introv Typ Red1.
@@ -484,6 +486,19 @@ Proof.
     try solve[destruct E; unfold fill in *; inverts* H0;
     forwards*: step_not_fix H2];
     try solve[inverts H2 as h0;inverts h0].
+Qed.
+
+
+Theorem step_unique: forall dir A e r1 r2,
+   Typing nil e dir A -> step e r1 -> step e r2 -> r1 = r2.
+Proof.
+  introv Typ Red1 Red2.
+  destruct dir.
+  -
+    forwards*: Typ_sub Typ.
+    forwards*: step_unique_chk Red1.
+  -
+    forwards*: step_unique_chk Red1.
 Qed.
 
 
@@ -566,3 +581,4 @@ Proof.
     forwards*: nstep_not_fix H2];
     try solve[inverts H2 as h0;inverts h0].
 Qed.
+

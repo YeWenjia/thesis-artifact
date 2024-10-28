@@ -641,7 +641,7 @@ Proof.
     forwards h4: IHn h3; auto.
     simpl in *; lia.
     +
-    forwards: sub_transtivity H3 h2.
+    forwards: sub_transitivity H3 h2.
     pick fresh x and apply Typ_abs; auto.
     forwards h3: h1 x; auto.
     forwards: IHn h3 H5.
@@ -783,6 +783,7 @@ Proof.
 Qed.
 
 
+(* we rely on for some lemmas JMeq.JMeq_eq : forall (A : Type) (x y : A), JMeq.JMeq x y -> x = y but it is safe. *)
 Lemma Preservation: forall e e' A dir P mu mu',
   P |== mu ->
   Typing P nil e dir A ->
@@ -797,18 +798,19 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
   - 
     inverts J as h1 h2 h3.
     destruct F; unfold fill in *;inverts h3.
-    exists*.
+    inverts* h3.
   -
     inverts J as h1 h2 h3.
     destruct F; unfold fill in *;inverts h3.
-    exists L. splits*.
+    inverts* h3.
+    lia.
   -
     inverts J as h1 h2 h3.
     +
     destruct F; unfold fill in *;inverts h3.
     +
     destruct i5; try solve[inverts H0].
-    exists L. splits*.
+    inverts* h3.
   -
     inverts J as h1 h2 h3.
     +
@@ -851,16 +853,14 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
   - (* loc *)
     inverts J as h1 h2 h3;try solve[inverts* h2].
     destruct F; unfold fill in *;inverts h3.
+    inverts* h3.
     lets ok': ok.
-    inverts ok as h2 h3.
-    inverts h3 as h3 h4.
-    rewrite h3 in *.
-    forwards* h5: h4 o.
-    forwards* h6: sto_ok_value h1.
-    forwards* h7: value_ptype h5.
-    rewrite h7 in *.
-    exists L.
-    splits*.
+    inverts ok as h4 h5.
+    inverts h5 as h51 h52.
+    rewrite h51 in *.
+    forwards* h6: h52.
+    rewrite <- H2 in h6.
+    inverts* h6.
   - (* ass *)
     inverts J as h1 h2 h3; try solve[inverts h2].
     +
@@ -871,22 +871,23 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
     forwards* h4: IHTyp2 h2.
     +
     inverts Typ1 as h3 h4 h5.
-    forwards h6: loc_inf h3; eauto.
+    forwards h6: loc_inf H4; eauto.
     inverts h6 as h6 h7.
     inverts h6 as h6 h62.
     inverts h6 as h6.
     inverts h62 as h15 h16; try solve[inverts h15].
     forwards h8: val_chk Typ2.
     inverts h8 as h8 h9.
-    forwards* h17: sub_transtivity h9 h16.
+    forwards* h17: sub_transitivity h9 h16.
     lets ok': ok.
     inverts ok as h19 h20.
     inverts h20 as h20 h21.
     rewrite h20 in *.
     forwards* h22: h21 o.
     forwards* h24: sto_ok_value H3.
-    forwards* h23:value_ptype h22.
-    rewrite h23.
+    lets h22': h22.
+    rewrite <- h3 in h22.
+    inverts h22.
     forwards* h25: length_replace o (e_anno p (store_Tlookup o L)) mu.
     forwards* h26: assign_pres_store_typing (e_anno p (store_Tlookup o L)).
     forwards* h27: Typing_chk_sub h8 h17.
@@ -921,8 +922,8 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
     inverts ok' as h3 h4.
     inverts h4 as h4 h5.
     rewrite <- h4.
-    forwards* h6: value_ptype Typ.
-    rewrite h6.
+    inverts typ as hh1.
+    inverts hh1.
     exists (L ++ A :: nil).
     splits*.
     eapply Typ_anno; eauto.
@@ -938,7 +939,7 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
   -
     inverts J as h1 h2 h3.
     destruct F; unfold fill in *;inverts h3.
-    exists*.
+    inverts* h3.
   - (* intro *)
     forwards* h1: IHTyp1 Typ1.
     lets(p1&h2&h3&h4): h1.
@@ -998,6 +999,26 @@ Proof.
 Qed.
 
 
+Lemma tymu_progress: forall p mu t L,
+ L |== mu ->
+ Typing L [] p Inf t ->
+ pvalue p ->
+ exists t', tymu p mu t'.
+Proof.
+ introv ok typ pval.
+ inverts* pval; try solve[inverts* typ].  
+ inverts typ.
+ inverts ok as ok1 ok2.
+ inverts ok2 as ok21 ok22.
+ rewrite ok21 in *.
+ forwards* h1: ok22 H3.
+ forwards* h2: sto_ok_value ok1.
+ inverts h2; try solve[inverts* h1].
+ rewrite <- H in h1.
+ inverts h1.
+Qed.
+
+
 Lemma progress : forall P mu e dir T,
   P |== mu ->
   Typing P nil  e dir T ->
@@ -1011,7 +1032,7 @@ Proof.
     try solve [right*];
     try solve [inverts* wel];
     try solve[inverts* wel;inverts* Lc; right; exists*];
-    try solve [inverts* H0]; eauto.
+    try solve [inverts* H0]; eauto. 
   - (* app *)
     right.
     forwards hh1:  IHTyp1;auto.
@@ -1049,6 +1070,9 @@ Proof.
     inverts Lc.
     forwards* h1: pvalue_decidable e.
     inverts h1 as h1; eauto.
+  - (* loc *)
+    forwards* h1: tymu_progress wel.
+    inverts* wel.
   -
     right. 
     forwards hh1:  IHTyp1;auto.
@@ -1061,8 +1085,23 @@ Proof.
       forwards* h5: chk_ref h2.
       inverts h5 as h5.
       lets wel': wel.
-      inverts* wel.
+      inverts wel as ok1 ok2.
+      inverts h2 as h2; try solve[inverts H1].
+      inverts h2.
       inverts* hh2.
+      inverts ok2 as ok2 ok3.
+      rewrite <- ok2 in *.
+      forwards* h7: ok3 x.
+      rewrite ok2 in *. 
+      forwards* h6: sto_ok_value ok1.
+      inverts h6 as h61 h62; try solve[inverts* h7].
+      rewrite <- h62 in *.
+      inverts* h7.
+      exists*.
+      eapply Step_ass; auto.
+      apply h62.
+      rewrite <- h62 in *.
+      inverts* h7.
     +
       inverts hh2 as hh2.
       inverts hh2 as hh2.
@@ -1098,6 +1137,8 @@ Proof.
     forwards hh1:  IHTyp;auto.
     inverts hh1 as hh1.
     + inverts* wel. 
+      inverts* hh1.
+      inverts Typ.
     +
     inverts hh1 as hh1.
     inverts hh1 as hh1.
@@ -1356,7 +1397,7 @@ Proof.
    forwards* h3: erase_length erm.
    forwards* h4: erase_ok erm.
    rewrite h3.
-   assert(erasem [v] [e1']) as h5; simpl.
+   assert(erasem [e_anno v t] [e1']) as h5; simpl.
    eapply edm_cons; eauto.
    forwards* h6: erase_extend erm h5.
    exists (e_loc (length mu2)) (mu2 ++ [e1']).
@@ -1367,7 +1408,7 @@ Proof.
    inverts h2 as h2.
    inverts h1 as h1.
    forwards* h3: pvalue_nvalue h2.
-   assert(erase (e_anno p (principle_type (store_lookup o mu1))) e2') as h6; eauto.
+   assert(erase (e_anno p t) e2') as h6; eauto.
    forwards* h4: erase_replace o erm h6.
    forwards* h5: erase_ok erm.
    exists e_unit (replace o e2' mu2); simpl.
@@ -1401,3 +1442,4 @@ Proof.
     auto.
     auto.
 Qed.
+

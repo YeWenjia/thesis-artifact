@@ -596,7 +596,7 @@ Qed.
 
 
 
-Theorem SGG_both: forall e e' T E1 E2 dir,
+Theorem SGG_both_gen: forall e e' T E1 E2 dir,
    precise e e' ->  
    Typing E1 e dir T ->
    cpre E1 E2 ->
@@ -618,6 +618,15 @@ Proof.
 Qed.
 
 
+
+Theorem SGG_both: forall e e' T dir,
+   precise e e' ->  
+   Typing nil e dir T ->
+   exists T', Typing nil e' dir T' /\ tpre T T'.
+Proof.
+  introv ep Typ1.
+  forwards*: SGG_both_gen ep Typ1.
+Qed.
 
 (* dgg *)
 
@@ -684,8 +693,14 @@ Qed. *)
 
 
 
-
-
+Print Assumptions consub_prop.
+Print Assumptions consub_propr.
+Print Assumptions Cast_progress.
+Print Assumptions step_unique.
+Print Assumptions step_unique.
+Print Assumptions preservation.
+Print Assumptions Progress.
+Print Assumptions SGG_both.
 
 
 

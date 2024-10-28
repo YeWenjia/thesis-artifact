@@ -527,6 +527,7 @@ Proof.
 Qed.
 
 
+(* we rely on for some lemmas JMeq.JMeq_eq : forall (A : Type) (x y : A), JMeq.JMeq x y -> x = y but it is safe. *)
 Theorem preservation : forall e e' dir A,
     Typing nil e dir A -> 
     step e (r_e e') -> 

@@ -164,6 +164,19 @@ Proof.
 Qed.
 
 
+Lemma tymu_eq: forall mu p t1 t2,
+ tymu p mu t1 ->
+ tymu p mu t2 ->
+ t1 = t2.
+Proof.
+  introv ty1 ty2.
+  inductions ty1; try solve[inverts* ty2]; try solve[inverts* ty2; lia].
+  inverts* ty2.
+  rewrite <- H in *.
+  inverts* H1.
+Qed.
+
+
 Theorem step_unique: forall P mu A e r1 r2,
    P |== mu -> Typing P nil e Chk A -> step (e, mu) r1 -> step (e, mu) r2 -> r1 = r2.
 Proof with solve_false.
@@ -183,13 +196,9 @@ Proof with solve_false.
       substs*.
       forwards* h4: fill_chk Typ.
       lets(t&h5):h4.
-      (* inverts h5 as h5. *)
       *
       forwards* h6: IHRed1 Red1 H4.
       congruence.
-      (* *
-      inverts h5 as h5.
-      forwards* h6: step_not_abs Red1. inverts h6. *)
     +
       forwards* h1: Typing_regular_1 Typ.
       destruct F; unfold fill in *; inverts H0;
@@ -200,7 +209,7 @@ Proof with solve_false.
       forwards* h0: step_not_value Red1;
       inverts h0].
     +
-      destruct F; unfold fill in *; inverts H4.
+      destruct F; unfold fill in *; inverts H5.
   -
      inverts Red2 as h2 h3;
     try solve[destruct F; unfold fill in *; inverts H0;
@@ -226,7 +235,7 @@ Proof with solve_false.
       destruct F; unfold fill in *; inverts H1;
       forwards* h0: step_not_value H5;
       inverts h0
-    ];try solve[inverts H5].
+    ];try solve[inverts H4].
   -
     forwards* h1: Typing_regular_1 Typ.
     inverts h1 as h1 h2.
@@ -237,7 +246,7 @@ Proof with solve_false.
       destruct F; unfold fill in *; inverts H2;
       forwards* h0: step_not_value H6;
       inverts h0
-    ];try solve[inverts H6].
+    ];try solve[inverts H7].
   - (* annov*)
     inverts* Red2;
     try solve[
@@ -248,9 +257,9 @@ Proof with solve_false.
     try solve[
       forwards* h1: step_not_value H6;
       inverts h1
-    ];try solve[inverts H5].
+    ];try solve[inverts H4].
   - (* deref *)
-    inverts* Red2; try solve[inverts H4].
+    inverts* Red2; try solve[inverts H3].
     forwards* h1: Typing_regular_1 Typ.
     inverts h1 as h2.
     inverts h2 as h3.
@@ -258,19 +267,22 @@ Proof with solve_false.
     forwards* h1: step_not_value H4;
     inverts h1.
   - (* deref *)
-    inverts* Red2; try solve[inverts H5].
+    inverts* Red2; try solve[inverts H4].
     forwards* h1: Typing_regular_1 Typ.
     inverts h1 as h2.
     destruct F; unfold fill in *; inverts H1;
     forwards* h1: step_not_value H5;
     inverts h1.
-  - (* ref *)
-     inverts* Red2; try solve[inverts H5].
-    +
-    destruct F; unfold fill in *; inverts* H1;
-    try solve[forwards* h1: step_not_value H5;inverts h1].
-  -
+  - (* set *)
     inverts* Red2; try solve[inverts H5].
+    +
+    destruct F; unfold fill in *; inverts* H2;
+    try solve[forwards* h1: step_not_value H6;inverts h1].
+    +
+    rewrite <- H1 in H10.
+    inverts H10; auto.
+  - (* set *)
+    inverts* Red2; try solve[inverts H6].
     +
     destruct F; unfold fill in *; inverts* H1;
     try solve[forwards* h1: step_not_value H5;inverts h1].
@@ -279,18 +291,9 @@ Proof with solve_false.
     +
     destruct F; unfold fill in *; inverts* H0;
     try solve[forwards* h1: step_not_abs H5;inverts h1].
-  - (* loc *)
-     inverts* Red2; try solve[inverts H4].
     +
-    destruct F; unfold fill in *; inverts* H0;
-    try solve[forwards* h1: step_not_value H5;inverts h1].
-  (* -
-    inverts* Red2;
-    try solve[
-      destruct F; unfold fill in *; inverts H1;
-      forwards* h1: step_not_value H5;
-      inverts h1
-    ];try solve[inverts H5]. *)
+    forwards* h1:tymu_eq H1 H7.
+    inverts* h1.
 Qed.
 
 

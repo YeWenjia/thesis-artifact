@@ -5,6 +5,8 @@ Require Import List.
 (** syntax *)
 Definition i : Set := nat.
 
+
+
 Inductive typ : Set :=  (*r types *)
  | t_int : typ (*r int *)
  | t_top : typ (*r top *)
@@ -14,7 +16,7 @@ Inductive typ : Set :=  (*r types *)
  | t_dyn : typ (*r dynamic type *)
  | t_rcd (l:var) (A:typ) (*r record *).
 
-
+(** This uses the locally nameless representation for terms and cofinite quantification in typing judgements. *)
 Inductive exp : Set :=  (*r expressions *)
  | e_var_b (_:nat) (*r variables *)
  | e_var_f (x:var) (*r variables *)

@@ -1,18 +1,10 @@
 Require Import LibTactics.
 Require Import Metalib.Metatheory.
+Require Import Disjointness.
 Require Import Coq.Program.Equality.
 Require Import Lia.
-Require Import syntax_ott
-                rules_inf
-                Infrastructure
-                Wellformedness
-                SubtypingInversion
-                Value
-                Disjointness
-               KeyProperties
-               Deterministic.
 
-(* 
+
 Lemma subsub2sub: forall A B, subsub A B -> algo_sub A B/\algo_sub B A.
 Proof with eauto.
   intros. inductions H;eauto; try solve[destruct IHsubsub; auto].
@@ -23,9 +15,9 @@ Proof with eauto.
     assert(spl (t_and A1 A2) A1 A2). auto.
     split. apply S_and with B1 B2...
     apply S_and with A1 A2...
-    apply sub_transtivity with B1.
+    apply sub_transitivity with B1.
     apply spl_sub_l with B2... auto.
-    apply sub_transtivity with B2.
+    apply sub_transitivity with B2.
     apply spl_sub_r with B1... auto.
 Qed.
 
@@ -416,4 +408,4 @@ Proof with auto.
         elia.
       *
       forwards* h2: IH A1 A0 B0. elia.  
-Qed. *)
+Qed.

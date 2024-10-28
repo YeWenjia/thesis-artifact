@@ -718,7 +718,7 @@ Qed.
 
 
 
-Theorem step_unique: forall A e r1 r2,
+Theorem step_unique_chk: forall A e r1 r2,
    Typing nil e Chk A -> step e r1 -> step e r2 -> r1 = r2.
 Proof.
   introv Typ Red1.
@@ -865,6 +865,18 @@ Proof.
     try solve[inverts H2 as h0;inverts h0].
 Qed.
 
+
+Theorem step_unique: forall dir A e r1 r2,
+   Typing nil e dir A -> step e r1 -> step e r2 -> r1 = r2.
+Proof.
+  introv Typ Red1 Red2.
+  destruct dir.
+  -
+    forwards*: Typ_cs Typ.
+    forwards*: step_unique_chk Red1.
+  -
+    forwards*: step_unique_chk Red1.
+Qed.
 
 
 Lemma sfill_eq_cbn: forall E0 e0 E e1 r1 r2,

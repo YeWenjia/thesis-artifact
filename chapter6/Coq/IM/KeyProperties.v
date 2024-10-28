@@ -32,13 +32,13 @@ Hint Extern 0 => match goal with
                    | [ H: fvalue (e_rcd _ _ ) |- _ ] => inverts H
                  end : falseHd. *)
 
-Lemma value_ptype: forall e A L G,
+(* Lemma value_ptype: forall e A L G,
     value e -> Typing L G e Inf A ->  principle_type e = A.
 Proof.
   introv Val H. 
   inductions H; intros; simpl in *;
   try solve [ inverts Val as h1;inverts* h1]; eauto.
-Qed.
+Qed. *)
 
 
 

@@ -40,7 +40,7 @@ Inductive dexp_static : exp -> Prop :=
   | dexp_static_app : forall e1 e2,
       dexp_static e1 ->
       dexp_static e2 ->
-      not(exists e, e1 = (e_abs e)) ->
+      (* not(exists e, e1 = (e_abs e)) -> *)
       dexp_static (e_app e1 e2)
   | dexp_static_merge : forall e1 e2,
       dexp_static e1 ->
@@ -101,6 +101,7 @@ Inductive dsub : typ -> typ -> Prop :=    (* defn dsub *)
 .
 
 
+
 Inductive dtyping : ctx -> exp -> dirflag -> typ -> Prop :=    (* defn dtyping *)
  | dtyp_top : forall (G:ctx),
       uniq  G  ->
@@ -147,7 +148,12 @@ Inductive dtyping : ctx -> exp -> dirflag -> typ -> Prop :=    (* defn dtyping *
  | dtyp_fix : forall (L:vars) (G:ctx) (A:typ) (e:exp),
       ( forall x , x \notin  L  -> dtyping  (cons ( x , A )  G )   ( open_exp_wrt_exp e (e_var_f x) )  Chk A )  ->
       well A ->
-     dtyping G (e_fixpoint e) Chk A.
+     dtyping G (e_fixpoint e) Chk A
+ | dtyp_rt : forall (L:vars) (G:ctx) (e e2: exp) (A B:typ),
+     ( forall x , x \notin  L  -> dtyping  (cons ( x , A )  G )   ( open_exp_wrt_exp e (e_var_f x) )  Chk B )  ->
+     dtyping G e2 Inf A ->
+     dtyping G (e_app (e_abs e) e2) Chk B
+.
 
 
 (* defns Reductions *)
@@ -198,6 +204,11 @@ Proof.
       rewrite_env (([(x, A)] ++ E) ++ F ++ G).
       apply~ H0.
       solve_uniq.
+      + (* abs *)
+      pick fresh x and apply dtyp_rt; eauto.
+      rewrite_env (([(x, A)] ++ E) ++ F ++ G).
+      apply~ H0.
+      solve_uniq.
 Qed.
 
 Lemma dtyping_weakening : forall (E F : ctx) e dir T,
@@ -229,15 +240,6 @@ Proof.
 Qed.
 
 
-(* Lemma topLike_dtyp_static: forall A,
- topLike A ->
- dtyp_static A.
-Proof.
- introv tl.
- inductions tl; eauto.
-Qed. *)
-
-
 Lemma dsub_dtyp_static: forall A B,
  dsub A B ->
  dtyp_static A /\ dtyp_static B.
@@ -252,7 +254,7 @@ Proof.
 Qed.
 
 
-Lemma dsub_transtivity : forall B A,
+Lemma dsub_transitivity : forall B A,
       dsub A B -> forall C, dsub B C -> dsub A C.
 Proof.
   induction B;
@@ -329,17 +331,23 @@ Proof.
       forwards*: H0 x.
       pick fresh x.
       forwards*: H0 x.
-      (* pick fresh x.
-      forwards*: H0 x. *)
     - destructs~ IHtyp1. destructs~ IHtyp2. inverts* H0.
-      assert(not(exists e', e1 = e_abs e')).
+      (* assert(not(exists e', e1 = e_abs e')).
       unfold not;intros nt; inverts nt.
       inverts typ1.
-      eauto.
+      eauto. *)
     - destructs~ IHtyp. 
       forwards*: get_ty_dtyp_static H. 
     - split.
       apply dexp_static_fix with L; intros;eauto.
+      forwards*: H0 x.
+      pick fresh x.
+      forwards*: H0 x.
+    -
+      split.
+      destructs~ IHtyp. 
+      apply dexp_static_app; auto.
+      apply dexp_static_abs with L; intros;eauto.
       forwards*: H0 x.
       pick fresh x.
       forwards*: H0 x.
@@ -385,9 +393,10 @@ Theorem static_dtyping_dyn : forall G e A dir,
  dexp_static e ->
  dtyp_static A ->
  dtyping G e dir A -> 
+ denv_static G ->
  Typing G e dir A.
 Proof.
-  introv es ts typ.
+  introv es ts typ sg.
   inductions typ;eauto.
   - inverts ts. inverts es.
     pick fresh x and apply Typ_abs; auto.
@@ -405,6 +414,12 @@ Proof.
     forwards*: dsub_csub H.
   - inverts es.
     pick fresh x and apply Typ_fix; auto.
+  -
+    inverts es.
+    forwards h1: dtyping_regular typ.
+    inverts h1.
+    inverts H3.
+    pick fresh x and apply Typ_rt; auto.
 Qed.
 
 
@@ -490,7 +505,10 @@ Proof.
     pick fresh x and apply dtyp_fix; auto.
   -
     inverts es.
-    exfalso; apply H5; eauto.
+    forwards h3: Typ_static_exp_static_typ typ; auto.
+    forwards h1: IHtyp; auto.
+    inverts H3.
+    pick fresh x and apply dtyp_rt; auto.
 Qed.
 
 
@@ -534,23 +552,77 @@ Qed.
 
 
 
+Lemma get_ty_well: forall A l B,
+ well A ->
+ get_ty A l B ->
+ well B.
+Proof.
+  introv well gt.
+  inductions gt; try solve[inverts* well]; eauto.
+Qed.
+
+
+
+Lemma dtyping_well: forall G e A dir,
+ WF G -> dtyping G e dir A -> well A.
+Proof.
+  introv wf Typ.
+  inductions Typ; eauto.
+  -
+    inductions wf; eauto; 
+    try solve[inverts* H0].
+    inverts H1 as h1.
+    +
+    inverts* h1.
+    +
+    inverts H0.
+    forwards*: IHwf.
+  -
+  pick fresh x.
+  forwards*: H0 x.
+  -
+  forwards* h1: IHTyp1.
+  inverts* h1.
+  -
+  forwards*: get_ty_well H.
+  -
+    forwards* h1: IHTyp.
+    pick fresh y.
+    forwards*: H0 y.
+Qed.
+
 Lemma fill_chk_chk: forall G e E B,
  dtyping G (fill E e) Chk B ->
  dtyp_static B ->
+ WF G ->
  exists A, dtyping G e Chk A.
 Proof.
-  introv typ st.
+  introv typ st wf.
   destruct E; unfold fill in *; inverts* typ;
   try solve[inverts* H].
   - inverts* H.
     forwards*: dtyping_regular H6.
+  -
+    forwards h1: dtyping_regular H3.
+    inverts h1.
+    exists.
+    pick fresh x and apply dtyp_abs; auto.
+    forwards: dtyping_well H3; auto.
+  - 
+    forwards h1: dtyp_sub H3 dS_top; auto.
+    forwards*: dtyping_regular H3.
+    exists.
+    apply h1.
   - inverts H.
+    exists t_top.
+    forwards h1: dtyp_sub H5 dS_top; auto.
     forwards*: dtyping_regular H5.
   - inverts H.
     forwards*: dtyping_regular H7.
   - inverts H.
     forwards*: dtyping_regular H5.
-  - inverts H.
+  -
+    inverts H.
     forwards*: dtyping_regular H6.
 Qed.
 
@@ -561,9 +633,11 @@ Theorem static_ddstep_dyn_chk : forall G e e' B,
  dtyp_static B ->
  dtyping G e Chk B ->
  dstep e e' -> 
+ denv_static G ->
+ WF G ->
  step e (r_e e').
 Proof.
- introv es ts typ dstep. gen G B.
+ introv es ts typ dstep sg wfg. gen G B.
  inductions dstep; intros; eauto;
  try solve[forwards*: dsub_csub H1];
  try solve[forwards*: dsub_csub H0].
@@ -574,15 +648,36 @@ Qed.
 
 
 
+Theorem static_ddstep_dyn : forall dir G e e' B,
+ dexp_static e ->
+ dtyp_static B ->
+ dtyping G e dir B ->
+ dstep e e' -> 
+ denv_static G ->
+ WF G ->
+ step e (r_e e').
+Proof.
+ introv es ts typ dstep sg wfg.
+ destruct dir.
+ -
+   forwards*: dtyp_sub typ.
+   forwards*: static_ddstep_dyn_chk H dstep.
+ -
+   forwards*: static_ddstep_dyn_chk dstep.
+Qed.
+
+
 
 Theorem static_stepd_dyn_chk : forall G e e' B,
  dexp_static e ->
  dtyp_static B ->
  dtyping G e Chk B ->
  step e (r_e e') -> 
+ denv_static G ->
+ WF G ->
  dstep e e'.
 Proof.
- introv es ts typ red. gen G B.
+ introv es ts typ red sg wfg. gen G B.
  inductions red;intros; eauto;
  try solve[forwards*: csub_dsub H1];
  try solve[forwards*: csub_dsub H0] . 
@@ -595,4 +690,24 @@ Proof.
  -
    inverts es as h1 h2.
    inverts h2.
+Qed.
+
+
+
+Theorem static_stepd_dyn : forall dir G e e' B,
+ dexp_static e ->
+ dtyp_static B ->
+ dtyping G e dir B ->
+ step e (r_e e') -> 
+ denv_static G ->
+ WF G ->
+ dstep e e'.
+Proof.
+ introv es ts typ red sg wfg.
+ destruct dir.
+ -
+   forwards*: dtyp_sub typ.
+   forwards*: static_stepd_dyn_chk H red.
+ -
+   forwards*: static_stepd_dyn_chk red.
 Qed.

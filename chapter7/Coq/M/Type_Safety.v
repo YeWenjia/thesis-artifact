@@ -333,8 +333,7 @@ Proof.
 Qed.
 
 
-
-
+(* we rely on for some lemmas JMeq.JMeq_eq : forall (A : Type) (x y : A), JMeq.JMeq x y -> x = y but it is safe. *)
 Theorem preservation : forall e e' dir A,
     Typing nil e dir A -> 
     step e e' -> 
@@ -735,6 +734,8 @@ Proof.
 Qed.
 
 
+
+
 Theorem Progress : forall e A,
     Typing nil e Inf A ->
     value e \/ (exists r, step e r).
@@ -968,17 +969,10 @@ Qed.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Print Assumptions Cast_unique.
+Print Assumptions Cast_preservation.
+Print Assumptions Cast_progress.
+Print Assumptions principal_inf.
+Print Assumptions step_unique.
+Print Assumptions preservation.
+Print Assumptions Progress.

@@ -16,6 +16,7 @@ Inductive typ : Set :=  (*r types *)
  | t_pos : typ (*r int *)
 .
 
+(** This uses the locally nameless representation for terms and cofinite quantification in typing judgements. *)
 Inductive exp : Set :=  (*r expressions *)
  | e_var_b (_:nat) (*r variable *)
  | e_var_f (x:termvar) (*r variable *)
@@ -48,6 +49,8 @@ Inductive dirflag : Set :=  (*r checking direction *)
 Definition sto : Set := list exp.
 Definition phi : Set := list typ.
 
+(* note that if location must exist, we restrict in typing rule that any location should be 
+within the store *)
 Definition store_Tlookup (n:nat) (ST: phi) :=
   nth n ST t_top.
 
@@ -167,18 +170,20 @@ end.
 (** definitions *)
 
 
-Fixpoint principle_type (e : exp) : typ :=
-    match e with 
-    | e_top  => t_top 
-    | (e_lit i) => match i with 
-                   | 0 => t_int
-                   | _ => t_pos 
-                   end
-    | (e_anno e A) => A
-    | e_unit  => t_unit 
-    (* | (e_val e t) => t *)
-    | _ => t_top
-    end.
+Inductive tymu : exp -> sto -> typ -> Prop :=   
+ | ty_top : forall mu, 
+     tymu e_top mu t_top
+ | ty_i : forall mu, 
+     tymu (e_lit 0) mu t_int
+ | ty_lit : forall i mu, 
+     i > 0 ->
+     tymu (e_lit i) mu t_pos 
+ | ty_unit:forall mu, 
+   tymu e_unit mu t_unit  
+ | ty_loc:forall mu t p o,
+   (e_anno p t) = store_lookup o mu ->  
+   tymu (e_loc o) mu (t_ref t)  
+.
 
 
 Inductive pvalue : exp -> Prop :=    (* defn value *)
@@ -197,15 +202,14 @@ Inductive pvalue : exp -> Prop :=    (* defn value *)
 
 
 Inductive ppvalue : exp -> Prop :=    (* defn value *)
- (* | ppvalue_abs : forall (A:typ) (e:exp) (B:typ),
-     lc_exp (e_abs e t) ->
-    ppvalue  (e_anno (e_abs e t) (t_arrow A B))  *)
  | ppvalue_top : 
      ppvalue e_top
  | ppvalue_unit : 
      ppvalue e_unit
  | ppvalue_lit : forall i, 
      ppvalue (e_lit i)
+ | ppvalue_loc: forall o,
+    ppvalue (e_loc o)
 .
 
 
@@ -462,25 +466,27 @@ Inductive step : conf  -> conf  -> Prop :=    (* defn step *)
  | Step_deref : forall (mu:sto) (o:nat) (A:typ),
      sto_ok mu ->
      step ((e_get (e_anno (e_loc o) (t_ref A)) ), mu) ((e_anno (store_lookup o mu) A), mu)
- | Step_ref : forall (mu:sto) (v:exp),
+ | Step_ref : forall (mu:sto) (v:exp) t,
      sto_ok mu ->
-     value v ->
-     step ((e_ref v), mu)  ((e_anno (e_loc (length mu)) (t_ref (principle_type v))), mu ++ v::nil)
- | Step_ass : forall (mu:sto) o p B A,
+     value (e_anno v t) ->
+     step ((e_ref (e_anno v t)), mu)  ((e_anno (e_loc (length mu)) (t_ref t)), mu ++ (e_anno v t)::nil)
+ | Step_ass : forall (mu:sto) o p B A pp t,
      sto_ok mu ->
      pvalue p ->
-     step ((e_set (e_anno (e_loc o) (t_ref A)) (e_anno p B)), mu)  (e_unit, replace o (e_anno p (principle_type (store_lookup o mu))) mu)
+     (e_anno pp t) = (store_lookup o mu) ->
+     step ((e_set (e_anno (e_loc o) (t_ref A)) (e_anno p B)), mu)  (e_unit, replace o (e_anno p t) mu)
  | Step_assa : forall (mu:sto) o p B A,
      sto_ok mu ->
      lc_exp (e_abs p B)  ->
      step ((e_set (e_anno (e_loc o) (t_ref A)) (e_abs p B)), mu)  ((e_set (e_anno (e_loc o) (t_ref A)) (e_anno (e_abs p B) A)), mu)
- | Step_p : forall (mu:sto) p,
+ | Step_p : forall (mu:sto) p t,
      sto_ok mu ->
      ppvalue p ->
-     step (p, mu)  ((e_anno p (principle_type p)), mu)
- | Step_o : forall (mu:sto) o,
+     tymu p mu t ->
+     step (p, mu)  ((e_anno p t), mu)
+ (* | Step_o : forall (mu:sto) o,
      sto_ok mu ->
-     step ((e_loc o), mu)  ((e_anno (e_loc o) (t_ref (principle_type (store_lookup o mu)))), mu)
+     step ((e_loc o), mu)  ((e_anno (e_loc o) (t_ref (principle_type (store_lookup o mu)))), mu) *)
 .
 
 
@@ -568,11 +574,7 @@ Inductive Typing : phi -> ctx -> exp -> dirflag -> typ -> Prop :=    (* defn Typ
      Typing L G e Chk B ->
      spl C A B ->
      Typing L G e Chk C 
- (* | Typ_val : forall (L:phi) (G:ctx) p (A:typ),
-     uniq G ->
-     pvalue p ->
-     Typing L nil p Chk A ->
-     Typing L G (e_val p A) Inf A *)
+  (* this is rule is because top is the super type of everytype, we do not show in the figure and we add a note in the paper.*)
  | Typ_abst : forall (LL : vars)  L (G:ctx) (A:typ) (e:exp),
      ( forall x , x \notin  LL  -> Typing L  (cons ( x ,  A )  G )   ( open_exp_wrt_exp e (e_var_f x) )  Chk t_top )  ->
     Typing L G (e_abs e A) Chk t_top
@@ -670,6 +672,6 @@ Inductive steps : conf  -> conf -> Prop :=
 (** infrastructure *)
 
 (* (* #[export] *)  *)
-Hint Constructors sto_okn erasem nsteps steps erase nvalue nstep ppvalue extends  pvalue WFTypformed Wformed algo_sub sto_ok phi_ok value spl ord step Typing lc_exp : core.
+Hint Constructors tymu sto_okn erasem nsteps steps erase nvalue nstep ppvalue extends  pvalue WFTypformed Wformed algo_sub sto_ok phi_ok value spl ord step Typing lc_exp : core.
 
 

@@ -1264,7 +1264,7 @@ Proof with (split_unify; auto with LcHd SubHd).
     +
       assert(algo_sub (t_ref A0) (t_ref B0)) as h1.
       auto.
-      forwards* h2: sub_transtivity H2 h1.
+      forwards* h2: sub_transitivity H2 h1.
     +
       forwards*: IH H H4.
       simpl in *.

@@ -425,7 +425,7 @@ Qed.
  Hint Immediate sub_r_spl_l sub_r_spl_r : core.
 
 
-Lemma sub_transtivity_gen : forall A B C n,
+Lemma sub_transitivity_gen : forall A B C n,
     size_typ A + size_typ B + size_typ C < n ->
     algo_sub A B -> algo_sub B C -> algo_sub A C.
 Proof with ( split_unify; eauto 4).
@@ -500,18 +500,18 @@ Proof with ( split_unify; eauto 4).
 Qed.
 
 
-
-Lemma sub_transtivity : forall A B C,
+(* we do not need type A B C to be locally closed because subtyping relation could imply which is shown in `algo_sub_lc`. *)
+Lemma sub_transitivity : forall A B C,
     algo_sub A B -> algo_sub B C -> algo_sub A C.
 Proof with ( split_unify; eauto 4).
   introv S1 S2.
-  eapply sub_transtivity_gen; eauto.
+  eapply sub_transitivity_gen; eauto.
 Qed.
 
 
 
 (* #[export] *)
- Hint Immediate sub_transtivity : core.
+ Hint Immediate sub_transitivity : core.
 
 
 
@@ -522,7 +522,7 @@ Qed.
  | |- algo_sub (t_and B _) B => applys sub_l_andl
  | |- algo_sub (t_and _ B) B => applys sub_l_andr
  | |- algo_sub A A  => applys sub_reflexivity
- | H: algo_sub A ?C |- _  => applys sub_transtivity H
+ | H: algo_sub A ?C |- _  => applys sub_transitivity H
  end : SubHd.
  
  Ltac auto_sub :=
@@ -531,12 +531,12 @@ Qed.
         | [ |- algo_sub ?A ?A ] => (applys sub_reflexivity)
         | [ |- algo_sub (t_and ?A1 _) ?A1 ] => (applys sub_l_andl; eauto with LcHd)
         | [ |- algo_sub (t_and _ ?A2) ?A2 ] => (applys sub_l_andr; eauto with LcHd)
-        | [ H : algo_sub ?A (t_and ?A1 _) |- algo_sub ?A ?A1 ] => (applys sub_transtivity H; auto_sub)
-        | [ H : algo_sub ?A (t_and _ ?A2) |- algo_sub ?A ?A2 ] => (applys sub_transtivity H; auto_sub)
+        | [ H : algo_sub ?A (t_and ?A1 _) |- algo_sub ?A ?A1 ] => (applys sub_transitivity H; auto_sub)
+        | [ H : algo_sub ?A (t_and _ ?A2) |- algo_sub ?A ?A2 ] => (applys sub_transitivity H; auto_sub)
         | [ |- algo_sub (t_and ?C ?D) (t_and ?A ?B) ] => (eapply S_and; try apply Sp_and)
         | [ |- algo_sub (t_and (t_arrow ?A ?B) (t_arrow ?A ?C)) (t_arrow ?A (t_and ?B ?C)) ] => (eapply S_and)
         | [ H1: algo_sub ?A ?B, H2: algo_sub ?B ?C |- algo_sub ?A ?C ] =>
-          (forwards: sub_transtivity H1 H2; auto)
+          (forwards: sub_transitivity H1 H2; auto)
         | [ H: spl ?A _ _ |- algo_sub _ ?A ] => (applys S_and H)
  
         | [ H1: spl ?A ?B ?C, H2: ord ?D, H3: algo_sub ?A ?D |- _ ] => (

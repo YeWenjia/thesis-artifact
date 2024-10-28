@@ -184,18 +184,44 @@ Inductive Acs : ttyp -> ttyp -> Prop :=
      Acs A2 B2 ->
      Acs (tt_arrow A1 A2) (tt_arrow B1 B2)
 |  Acs_rcd: forall A1 A2,
+    rt_type A1 ->
+    rt_type A2 ->
+    type A1 -> type A2 ->
+    collectLabel A2 [<=] collectLabel A1 ->
+    (forall i t1 t2, i `in` collectLabel A2 -> Tlookup i A1 = Some t1 -> Tlookup i A2 = Some t2 -> Acs t1 t2) ->
+    Acs A1 A2
+|  Acs_rcdd: forall A1 A2,
+    rw_type A1 ->
+    rw_type A2 ->
+    type A1 -> type A2 ->
+    (exists i t1 t2, Tlookup i A1 = Some t1 /\ Tlookup i A2 = Some t2 /\ Acs t1 t2) ->
+    Acs A1 A2
+|  Acs_rcdr: forall A1 A2,
+    rt_type A1 ->
+    rw_type A2 ->
+    type A1 -> type A2 ->
+    collectLabel A2 [<=] collectLabel A1 ->
+    (forall i t1 t2, i `in` collectLabel A2 -> Tlookup i A1 = Some t1 -> Tlookup i A2 = Some t2 -> Acs t1 t2) ->
+    Acs A1 A2
+|  Acs_rcddr: forall A1 A2,
+    rw_type A1 ->
+    rt_type A2 ->
+    type A1 -> type A2 ->
+    (exists i t1 t2, Tlookup i A1 = Some t1 /\ Tlookup i A2 = Some t2 /\ Acs t1 t2) ->
+    Acs A1 A2
+(* |  Acs_rcd: forall A1 A2,
     rw_type A1 ->
     rt_type A2 ->
     type A1 -> type A2 ->
     (exists i t1 t2, Tlookup i A1 = Some t1 /\  Tlookup i A2 = Some t2 /\ Acs t1 t2) ->
-    Acs A1 A2
-|  Acs_row: forall A1 A2,
+    Acs A1 A2 *)
+(* |  Acs_row: forall A1 A2,
     rw_type A1 ->
     rw_type A2 ->
     type A1 -> type A2 ->
     (exists i t1 t2, Tlookup i A1 = Some t1 /\  Tlookup i A2 = Some t2 /\ Acs t1 t2) ->
-    Acs A1 A2
- |  Acs_rowr: forall i T1 T2 T3 T4,
+    Acs A1 A2 *)
+ (* |  Acs_rowr: forall i T1 T2 T3 T4,
     Acs T1 T3 ->
     Acs T2 T4 ->
     Acs  (tt_rcd i T1 T2) (tt_row i T3 T4)
@@ -209,7 +235,8 @@ Inductive Acs : ttyp -> ttyp -> Prop :=
  | Acs_RcdPerm: forall T1 T2 i1 i2 T3,
     type (tt_rcd i1 T1 (tt_rcd i2 T2 T3)) ->
     i1 <> i2 ->
-    Acs (tt_rcd i1 T1 (tt_rcd i2 T2 T3)) (tt_rcd i2 T2 (tt_rcd i1 T1 T3)).
+    Acs (tt_rcd i1 T1 (tt_rcd i2 T2 T3)) (tt_rcd i2 T2 (tt_rcd i1 T1 T3)) *)
+.
 
 
 (* EXPERIMENTAL *)
@@ -511,22 +538,154 @@ Proof.
   inductions A; simpl  in *; try fsetdec.
 Qed.
 
-Theorem Acs_CS_Soundness: forall t1 t2,
+
+Lemma type_rt_ty: forall T,
+  type T ->
+  rt_type T->
+  rt_ty T.
+Proof.
+  introv ty rt.
+  inductions ty; eauto; try solve[inverts* rt].
+Qed.
+
+
+Lemma type_rw_ty: forall T,
+  type T ->
+  rw_type T->
+  rw_ty T.
+Proof.
+  introv ty rt.
+  inductions ty; eauto; try solve[inverts* rt].
+Qed.
+
+
+Lemma tlookup_sz: forall i t x,
+  Tlookup i t = Some x ->
+  ssize_typ x < ssize_typ t.
+Proof.
+  introv tl.
+  inductions t; simpl in *; eauto; try solve[inverts tl]; try solve[lia].
+  -
+    destruct(l == i).
+    +
+    assert(t1 = x).
+    inverts* tl.
+    inverts* H.
+    lia.
+    +
+    forwards*: IHt2 tl.
+    lia.
+  -
+    destruct(l == i).
+    +
+    assert(t1 = x).
+    inverts* tl.
+    inverts* H.
+    lia.
+    +
+    forwards*: IHt2 tl.
+    lia.
+Qed.
+
+
+
+
+Lemma get_ty_csub_aux: forall t1 l t2 t3,
+ ityp t1 l -> 
+ get_ty t1 l t2 ->
+ t2 <:~ t3 -> 
+ t1 <:~ t_rcd l t3.
+Proof.
+  introv nin gt cs.
+  inductions gt; eauto.
+  -
+    exfalso; apply H; eauto.
+Qed.
+
+
+
+Theorem Acs_CS_Soundness: forall t1 t2 n,
+ ssize_typ t1 + ssize_typ t2 < n ->
  Acs t1 t2 -> (transt t1) <:~ (transt t2).
 Proof.
- introv acs.
- inductions acs; simpl in *; eauto. 
- - inductions H; simpl in *; eauto.
-   lets(i&t1&t2&none&lup&acs): H3.
-   inverts* none.
+ introv sz acs.
+ gen t1 t2.
+ inductions n; intros; try solve[lia].
+ inverts acs; simpl in *; eauto.
  -
+   forwards* h1: IHn H.
+   lia.
+   forwards* h2: IHn H0.
+   lia.
+ -
+   gen t1.
+   inductions H2; intros;simpl in *; try solve[inverts H0];eauto.
+   assert(i `in` collectLabel t1) as h0.
+   fsetdec.
+   forwards* h1: lookup_some h0.
+   inverts h1 as h1.
+   forwards* h2: H5 i x T1.
+   destruct(i == i); auto.
+   exfalso; apply n0; auto.
+   assert((collectLabel T2) [<=] collectLabel t1) as h3.
+   fsetdec.
+   assert(forall (i : atom) (t2 t3 : ttyp),
+   i `in` (collectLabel T2) ->
+   Tlookup i t1 = Some t2 ->
+   Tlookup i T2 = Some t3 -> Acs t2 t3) as h4.
+   introv h5 h6 h7.
+   destruct(i == i0).
+   inverts* e.
+   forwards* h8: H5 i0.
+   destruct(i == i0).
+   inverts* e. auto.
+   forwards* h9: IHtype2 h4.
+   simpl in *; lia.
+   forwards* h10: tlookup_get_ty h1.
+   forwards* h11: tlookup_sz h1.
+   forwards* h12:IHn h2.
+   lia.
+   apply CS_andr; auto.
+   forwards*: in_ityp_rcd h0.
+   forwards*: get_ty_csub_aux h10 h12.
+  -
    inductions H; simpl in *; eauto.
-   lets(i&t1&t2&none&lup&acs): H3.
+   lets(i&tt1&tt2&none&lup&acs): H3.
    inverts* none.
- -
-   apply CS_andr; eauto.
- -
-  apply CS_andr; eauto.
+  -
+   inductions H2; intros;simpl in *; try solve[inverts H0];eauto.
+   assert(i `in` collectLabel t1) as h0.
+   fsetdec.
+   forwards* h1: lookup_some h0.
+   inverts h1 as h1.
+   forwards* h2: H5 i x T1.
+   destruct(i == i); auto.
+   exfalso; apply n0; auto.
+   assert((collectLabel T2) [<=] collectLabel t1) as h3.
+   fsetdec.
+   assert(forall (i : atom) (t2 t3 : ttyp),
+   i `in` (collectLabel T2) ->
+   Tlookup i t1 = Some t2 ->
+   Tlookup i T2 = Some t3 -> Acs t2 t3) as h4.
+   introv h5 h6 h7.
+   destruct(i == i0).
+   inverts* e.
+   forwards* h8: H5 i0.
+   destruct(i == i0).
+   inverts* e. auto.
+   forwards* h9: IHtype2 h4.
+   simpl in *; lia.
+   forwards* h10: tlookup_get_ty h1.
+   forwards* h11: tlookup_sz h1.
+   forwards* h12:IHn h2.
+   lia.
+   apply CS_andr; auto.
+   forwards*: in_ityp_rcd h0.
+   forwards*: get_ty_csub_aux h10 h12.
+  -
+   inductions H; simpl in *; eauto.
+   lets(i&tt1&tt2&none&lup&acs): H3.
+   inverts* none.
 Qed.
 
 
@@ -546,7 +705,8 @@ Proof.
  -
    forwards*: label_notbelongw H.
    forwards*: notin_nityp_rcd H0.
-Qed.
+Qed. 
+
 
 
 Lemma atyping_type: forall G e T t,
@@ -596,24 +756,6 @@ Proof.
 Qed.
 
 
-Lemma type_rt_ty: forall T,
-  type T ->
-  rt_type T->
-  rt_ty T.
-Proof.
-  introv ty rt.
-  inductions ty; eauto; try solve[inverts* rt].
-Qed.
-
-
-Lemma type_rw_ty: forall T,
-  type T ->
-  rw_type T->
-  rw_ty T.
-Proof.
-  introv ty rt.
-  inductions ty; eauto; try solve[inverts* rt].
-Qed.
 
 
 Lemma type_disjoint: forall A,
@@ -680,3 +822,5 @@ Proof.
    forwards*: Anotin_disjoint H1.
 Qed.
 
+
+Print Assumptions AGT_Soundness.

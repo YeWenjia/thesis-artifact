@@ -412,10 +412,154 @@ Qed.
 
 
 
+Lemma disjoint_eqv_r_aux: forall A B C n,  
+ size_typ A + size_typ B + size_typ C < n ->
+ disjoint A B ->
+ csub (change_typ A) C -> csub (change_typ B) C -> csub t_top C.
+Proof.
+   introv sz Dis S1 S2.
+   gen A B C.
+   induction n; intros;try solve[lia].
+   inverts Dis; auto.
+   -
+     destruct C; auto.
+     +
+     forwards hh1: csub_andl S1; auto.
+     inverts hh1 as hh1.
+     forwards: IHn H hh1 S2; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 hh1 S2; auto.
+     simpl in *; lia; auto.
+     +
+     inverts S1 as hh1.
+     forwards: IHn H hh1 S2; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 hh1 S2; auto.
+     simpl in *; lia; auto.
+     +
+     forwards hh1: csub_andl S1; auto.
+     inverts hh1 as hh1.
+     forwards: IHn H hh1 S2; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 hh1 S2; auto.
+     simpl in *; lia; auto.
+     +
+     forwards hh1: cand_inversion S1; auto.
+     forwards hh2: cand_inversion S2; auto.
+     inverts hh1 as hh1 hh11.
+     inverts hh2 as hh2 hh22.
+     forwards: IHn hh1 hh2; auto.
+     simpl in *; lia; auto.
+     forwards: IHn hh11 hh22; auto.
+     simpl in *; lia; auto.
+     +
+     forwards hh1: csub_andl S1; auto.
+     inverts hh1 as hh1.
+     forwards: IHn H hh1 S2; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 hh1 S2; auto.
+     simpl in *; lia; auto.
+   -
+     destruct C; auto.
+     +
+     forwards hh1: csub_andl S2; auto.
+     inverts hh1 as hh1.
+     forwards: IHn H S1 hh1; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 S1 hh1; auto.
+     simpl in *; lia; auto.
+     +
+     inverts S2 as hh1.
+     forwards: IHn H S1 hh1; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 S1 hh1; auto.
+     simpl in *; lia; auto.
+     +
+     forwards hh1: csub_andl S2; auto.
+     inverts hh1 as hh1.
+     forwards: IHn H S1 hh1; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 S1 hh1; auto.
+     simpl in *; lia; auto.
+     +
+     forwards hh1: cand_inversion S1; auto.
+     forwards hh2: cand_inversion S2; auto.
+     inverts hh1 as hh1 hh11.
+     inverts hh2 as hh2 hh22.
+     forwards: IHn hh1 hh2; auto.
+     simpl in *; lia; auto.
+     forwards: IHn hh11 hh22; auto.
+     simpl in *; lia; auto.
+     +
+     forwards hh1: csub_andl S2; auto.
+     inverts hh1 as hh1.
+     forwards: IHn H S1 hh1; auto.
+     simpl in *; lia; auto.
+     forwards: IHn H0 S1 hh1; auto.
+     simpl in *; lia; auto.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     +
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+     +
+     exfalso; apply H; auto.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+   -
+     inverts S1 as h1 h2; inverts S2 as h11 h22; auto.
+     forwards: IHn h1 h11; auto.
+     simpl in *;lia.
+     forwards: IHn h2 h22; auto.
+     simpl in *;lia.
+Qed.
+
+
+Lemma disjoint_eqv_r: forall A B,  
+ disjoint A B ->
+ disjointSpec A B.
+Proof.
+   introv dis.
+   unfold disjointSpec;intros.
+   eapply disjoint_eqv_r_aux; eauto.
+Qed.
+
+
 Lemma disjoint_eqv: forall A B,
     disjointSpec A B <-> disjoint A B.
 Proof.
   intros A B.
+
   unfold disjointSpec.
   split.
   - gen B.
@@ -458,79 +602,7 @@ Proof.
       forwards*: H (t_rcd l0 t_top). 
       inverts H0.
   - 
-      intros H C S1 S2.
-      (* apply toplike_super_topc; auto. *)
-      gen B C.
-      induction* A;
-        intros B H;
-        [ induction* B | inductions B | skip | skip| induction* B  ];
-        intros C S1 S2;
-        try solve [inverts H; inverts* H0]; simpl in *. 
-    + (* int arr *)
-      induction* C;
-      inverts S1;
-      inverts* S2.
-    + (* int and *)
-      induction* C;
-      inverts H;
-      inverts* S1;
-      try solve[forwards*: toplike_super_toplc S];
-      try solve[forwards*: csub_andl S2];
-      try solve[forwards*: cand_inversion S2];
-      try solve [
-        inverts S2;inverts S;
-        try solve[inverts H0];
-        [ forwards*: IHB1 |
-          forwards*: IHB2 ]
-          ].
-    + (* int rcd *)
-      induction* C;
-        inverts S1;
-        inverts* S2.
-    + (* bot top *)
-     induction* C;
-      inverts H;
-      inverts* S1;  
-      try solve[forwards*: toplike_super_toplc S];
-      try solve[forwards*: csub_andl S2];
-      try solve[inverts* H0].
-    + (* bot and *)
-      induction* C;
-      inverts H;
-      inverts* S1;  
-      try solve[forwards*: toplike_super_toplc S];
-      try solve[forwards*: csub_andl S2];
-      try solve[forwards*: cand_inversion S2];
-      try solve[inverts* H0].
-      inverts* S2.
-    + (*bot dyn*)
-      induction* C;
-        inverts S1;
-        inverts* S2.
-    + (* rcd int *)
-      induction* C;
-        inverts S1;
-        inverts* S2.
-    + (* rcd arr *)
-      induction* C;
-        inverts S1;
-        inverts* S2.
-    + 
-      (* rcd and *)
-      induction* C;
-      inverts H;
-      inverts* S1;  
-      try solve[forwards*: toplike_super_toplc S];
-      try solve[forwards*: csub_andl S2];
-      try solve[forwards*: cand_inversion S2];
-      try solve[inverts* H0].
-    + (* rcd rcd*)
-      induction* C;
-      inverts H;
-      inverts* S1; 
-      try solve[forwards*: toplike_super_toplc S];
-      try solve[inverts* H0];
-      try solve[inverts* S2].
+     apply disjoint_eqv_r; eauto.
 Qed. 
 
 

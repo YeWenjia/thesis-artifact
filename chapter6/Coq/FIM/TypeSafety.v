@@ -806,7 +806,7 @@ Proof.
     inverts H10 as hh2; try solve[inverts hh2].
     forwards: algo_sub_lc hh2.
     inverts H0 as hh3; try solve[inverts hh3].
-    forwards h1: sub_transtivity hh2 hh3.
+    forwards h1: sub_transitivity hh2 hh3.
     inverts ok.
     exists. splits*.
   -
@@ -1005,7 +1005,7 @@ Proof.
     +
     forwards* (h5&h6): subsub2sub h4.
     forwards* (h7&h8): subsub2sub H1.
-    forwards* h9: sub_transtivity h5 h8.
+    forwards* h9: sub_transitivity h5 h8.
     forwards* h10: Typing_chk_sub h3 h9.
     forwards* h: Typing_regular_0  h1.
     inverts* h.
@@ -1986,7 +1986,7 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
     assert(algo_sub (store_Tlookup o P) A).
     inverts* H11; try solve[inverts* H4];
     try solve[inverts* H1].
-    forwards* h6: sub_transtivity h4 H1.
+    forwards* h6: sub_transitivity h4 H1.
     + (* deref *)
       inverts Typ as h1 h2.
       inverts h1 as h1 h2 h3; try solve[inverts h1 as h1;inverts h1].
@@ -2060,6 +2060,32 @@ Proof with (simpl; try lia; auto; try eassumption; eauto).
     forwards* h2: step_not_value J. inverts h2.
 Qed.
 
+
+(* we rely on for some lemmas JMeq.JMeq_eq : forall (A : Type) (x y : A), JMeq.JMeq x y -> x = y but it is safe. *)
+
+Lemma Preservation: forall e e' A dir P mu mu',
+  P |== mu ->
+  Typing P nil e dir A ->
+  step (e, mu) (e', mu') ->
+  exists P', extends P' P /\ Typing P' nil e' Chk A /\ P' |== mu'.
+Proof.
+  introv ok Typ J.
+  forwards* h:
+  Preservation_subsub ok Typ J.
+  inverts h as h.
+  inverts h as h.
+  inverts h as h1 h.
+  inverts h as h2 h.
+  inverts h as h3 h.
+  destruct dir.
+  -
+    forwards* (h5&h6): subsub2sub h3.
+    forwards* h7: Typing_regular_0 Typ.
+  -
+    forwards* (h5&h6): subsub2sub h3.
+    forwards* h7: Typing_regular_0 Typ.
+    forwards* h8: Typing_chk_sub h2 h5.
+Qed.
 
 
 Lemma Cast_progress: forall P v A,
@@ -2235,7 +2261,7 @@ Proof with eauto.
     try solve[
       forwards hh: split_ord_false H1;auto; inverts* hh
     ].
-    forwards* h12: sub_transtivity h11 h82.
+    forwards* h12: sub_transitivity h11 h82.
     forwards* h18: Typing_chk_sub h2 h12.
     forwards* h19: Cast_progress h18.
     inverts h19 as h19.
